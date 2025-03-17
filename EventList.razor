@@ -1,0 +1,32 @@
+@page "/events"
+@using EventEase.Models
+@inject EventService EventService
+
+<h1>Event List</h1>
+
+@if (events == null)
+{
+    <p>Loading events...</p>
+}
+else if (events.Count == 0)
+{
+    <p>No events available.</p>
+}
+else
+{
+    <div class="event-list">
+        @foreach (var eventItem in events)
+        {
+            <EventCard Event="eventItem" />
+        }
+    </div>
+}
+
+@code {
+    private List<EventModel> events;
+
+    protected override async Task OnInitializedAsync()
+    {
+        events = await EventService.GetEventsAsync();
+    }
+}

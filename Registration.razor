@@ -1,0 +1,65 @@
+@page "/registration"
+
+<h3>Event Registration</h3>
+
+<EditForm Model="@registrationModel" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="name">Name:</label>
+        <InputText id="name" class="form-control" @bind-Value="@registrationModel.Name" />
+        <ValidationMessage For="@(() => registrationModel.Name)" />
+    </div>
+
+    <div class="form-group">
+        <label for="email">Email:</label>
+        <InputText id="email" type="email" class="form-control" @bind-Value="@registrationModel.Email" />
+        <ValidationMessage For="@(() => registrationModel.Email)" />
+    </div>
+
+    <div class="form-group">
+        <label for="event">Select Event:</label>
+        <InputSelect id="event" @bind-Value="@registrationModel.SelectedEventId" class="form-control">
+            <option value="">-- Select an Event --</option>
+            @foreach (var eventItem in events)
+            {
+                <option value="@eventItem.Id">@eventItem.Name</option>
+            }
+        </InputSelect>
+        <ValidationMessage For="@(() => registrationModel.SelectedEventId)" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Register</button>
+</EditForm>
+
+@code {
+    private RegistrationModel registrationModel = new RegistrationModel();
+    private List<EventModel> events = new List<EventModel>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Fetch events from the EventService
+        events = await EventService.GetEventsAsync();
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        // Handle registration logic here
+        await EventService.RegisterUserAsync(registrationModel);
+        // Optionally, navigate to a confirmation page or show a success message
+    }
+}
+
+public class RegistrationModel
+{
+    [Required(ErrorMessage = "Name is required.")]
+    public string Name { get; set; }
+
+    [Required(ErrorMessage = "Email is required.")]
+    [EmailAddress(ErrorMessage = "Invalid email address.")]
+    public string Email { get; set; }
+
+    [Required(ErrorMessage = "Please select an event.")]
+    public int SelectedEventId { get; set; }
+}
